@@ -21,6 +21,8 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: image=moby/buildkit:latest
 
       - name: Configure Docker Daemon
         run: |
@@ -30,10 +32,14 @@ jobs:
       - name: Login to Docker Registry
         run: docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
 
+      - name: Create and use custom builder instance
+        run: |
+          docker buildx create --name mybuilder --use --driver docker-container --driver-opt network=host
+          docker buildx inspect --bootstrap
+
       - name: Build and Push Docker Image
         run: |
           TAG_NAME=$(echo $GITHUB_SHA | head -c7)
-          docker buildx create --use
           docker buildx build --no-cache --push --tag $REGISTRY/$IMAGE_NAME:$TAG_NAME --allow security.insecure .
 
   deploy-image:
