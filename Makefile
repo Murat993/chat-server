@@ -32,7 +32,7 @@ build:
 copy-to-server:
 	scp service_linux root@89.23.116.87:
 
-docker-build-and-push:
-	docker buildx build --no-cache --platform linux/amd64 -t timeweb.nyssambayev.dev/server:v0.0.1 .
-	docker login -u murat -p qwe123 timeweb.nyssambayev.dev
-	docker push timeweb.nyssambayev.dev/server:v0.0.1
+#docker-build-and-push:
+#	docker buildx build --no-cache --platform linux/amd64 -t timeweb.nyssambayev.dev/server:v0.0.1 .
+#	docker login -u murat -p qwe123 timeweb.nyssambayev.dev
+#	docker push timeweb.nyssambayev.dev/server:v0.0.1
