@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 create table chat (
   id serial primary key,
-  form text not null,
+  from varchar(255) not null,
   text text not null,
   created_at timestamp not null default now(),
   updated_at timestamp
