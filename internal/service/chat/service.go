@@ -19,3 +19,18 @@ func NewService(chatRepository repository.ChatRepository, txManager db.TxManager
 		txManager:      txManager,
 	}
 }
+
+func NewMockService(deps ...interface{}) def.ChatService {
+	srv := server{}
+
+	for _, v := range deps {
+		switch s := v.(type) {
+		case repository.ChatRepository:
+			srv.chatRepository = s
+		case db.TxManager:
+			srv.txManager = s
+		}
+	}
+
+	return &srv
+}
