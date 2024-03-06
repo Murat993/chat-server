@@ -113,9 +113,16 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
+
+	accessClient, err := a.serviceProvider.connectGRPCClient()
+	if err != nil {
+		return err
+	}
+
 	a.grpcServer = grpc.NewServer(
 		grpc.Creds(insecure.NewCredentials()),
 		grpc.UnaryInterceptor(interceptor.ValidateInterceptor),
+		grpc.UnaryInterceptor(interceptor.NewAuthInterceptor(accessClient).Unary),
 	)
 
 	reflection.Register(a.grpcServer)

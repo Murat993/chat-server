@@ -8,6 +8,7 @@ import (
 )
 
 var configPath string
+var accessToken = flag.String("a", "", "access token")
 
 func init() {
 	flag.StringVar(&configPath, "config-path", ".env", "path to config file")
@@ -17,7 +18,9 @@ func main() {
 	flag.Parse()
 	ctx := context.Background()
 
-	a, err := app.NewApp(ctx)
+	ctxWithVal := context.WithValue(ctx, "accessToken", *accessToken)
+
+	a, err := app.NewApp(ctxWithVal)
 	if err != nil {
 		log.Fatalf("failed to init app: %s", err.Error())
 	}

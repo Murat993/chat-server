@@ -13,6 +13,9 @@ import (
 	chatRepository "github.com/Murat993/chat-server/internal/repository/chat"
 	"github.com/Murat993/chat-server/internal/service"
 	chatService "github.com/Murat993/chat-server/internal/service/chat"
+	"github.com/Murat993/chat-server/pkg/access_v1"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"log"
 )
 
@@ -29,6 +32,8 @@ type serviceProvider struct {
 	chatService service.ChatService
 
 	chatImpl *chat.Implementation
+
+	accessClient access_v1.AccessV1Client
 }
 
 func newServiceProvider() *serviceProvider {
@@ -140,4 +145,24 @@ func (s *serviceProvider) ChatImpl(ctx context.Context) *chat.Implementation {
 	}
 
 	return s.chatImpl
+}
+
+func (s *serviceProvider) connectGRPCClient() (access_v1.AccessV1Client, error) {
+	creds, err := credentials.NewClientTLSFromFile("certificates/service.pem", "")
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("GRPC client is running on %s", s.grpcConfig.AddressAuth())
+
+	conn, err := grpc.Dial(s.grpcConfig.AddressAuth(), grpc.WithTransportCredentials(creds))
+	if err != nil {
+		return nil, err
+	}
+
+	c := access_v1.NewAccessV1Client(conn)
+
+	s.accessClient = c
+
+	return s.accessClient, nil
 }
