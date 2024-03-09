@@ -139,21 +139,21 @@ func (s *serviceProvider) ChatService(ctx context.Context) service.ChatService {
 	return s.chatService
 }
 
-func (s *serviceProvider) ChatImpl(ctx context.Context) *chat.Implementation {
+func (s *serviceProvider) ChatImpl(_ context.Context) *chat.Implementation {
 	if s.chatImpl == nil {
-		s.chatImpl = chat.NewImplementation(s.ChatService(ctx))
+		s.chatImpl = chat.NewImplementation()
 	}
 
 	return s.chatImpl
 }
 
-func (s *serviceProvider) connectGRPCClient() (access_v1.AccessV1Client, error) {
+func (s *serviceProvider) connectGRPCClient(addressAuth string) (access_v1.AccessV1Client, error) {
 	creds, err := credentials.NewClientTLSFromFile("certificates/service.pem", "")
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("GRPC client is running on %s", s.grpcConfig.AddressAuth())
+	log.Printf("GRPC client is running on %s", addressAuth)
 
 	conn, err := grpc.Dial(s.grpcConfig.AddressAuth(), grpc.WithTransportCredentials(creds))
 	if err != nil {

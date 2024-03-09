@@ -7,6 +7,7 @@ import (
 	"github.com/Murat993/chat-server/internal/interceptor"
 	desc "github.com/Murat993/chat-server/pkg/chat_v1"
 	_ "github.com/Murat993/chat-server/statik"
+	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/cors"
@@ -114,15 +115,19 @@ func (a *App) initServiceProvider(_ context.Context) error {
 
 func (a *App) initGRPCServer(ctx context.Context) error {
 
-	accessClient, err := a.serviceProvider.connectGRPCClient()
+	accessClient, err := a.serviceProvider.connectGRPCClient(a.serviceProvider.GRPCConfig().AddressAuth())
 	if err != nil {
 		return err
 	}
 
 	a.grpcServer = grpc.NewServer(
 		grpc.Creds(insecure.NewCredentials()),
-		grpc.UnaryInterceptor(interceptor.ValidateInterceptor),
-		grpc.UnaryInterceptor(interceptor.NewAuthInterceptor(accessClient).Unary),
+		grpc.UnaryInterceptor(
+			grpcMiddleware.ChainUnaryServer(
+				interceptor.ValidateInterceptor,
+				interceptor.NewAuthCheckInterceptor(accessClient).Unary,
+			),
+		),
 	)
 
 	reflection.Register(a.grpcServer)

@@ -28,14 +28,14 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service ChatV1 {
-  // Создание чата
-  rpc Create(CreateRequest) returns (CreateResponse){
+  // Создает новый чат. Принимает пустой запрос и возвращает ответ с идентификатором чата.
+  rpc Create(google.protobuf.Empty) returns (CreateResponse){
     option (google.api.http) =  {
       post: "/chat/v1/create"
       body: "*"
     };
   };
-  // Отправка сообщения
+  // Отправляет сообщение в чат. Принимает идентификатор чата и сообщение, возвращает пустой ответ.
   rpc SendMessage(SendMessageRequest) returns (google.protobuf.Empty){
     option (google.api.http) =  {
       post: "/chat/v1/send-message"
@@ -48,31 +48,36 @@ service ChatV1 {
       delete: "/chat/v1"
     };
   };
+
+  // Подключается к чату. Принимает идентификатор чата и имя пользователя, возвращает поток сообщений.
+  rpc ConnectChat (ConnectChatRequest) returns (stream Message);
 }
 
-message Chat {
-  ChatInfo info = 1;
-  google.protobuf.Timestamp timestamp = 2;
+
+// Определяет структуру сообщения, содержащую отправителя, текст сообщения и временную метку создания.
+message Message {
+  string from = 1; // Идентификатор/имя отправителя сообщения.
+  string text = 2; // Текст сообщения.
+  google.protobuf.Timestamp created_at = 3; // Временная метка создания сообщения.
 }
 
-message ChatInfo {
-  string from = 1;
-  string text = 2 [(validate.rules).string = {min_len: 1, max_len: 50}];
-}
-
-message CreateRequest {
-  repeated string usernames = 1;
-}
-
+// Определяет структуру ответа на создание чата, содержащую идентификатор созданного чата.
 message CreateResponse {
-  int64 id = 1;
+  string chat_id = 1;
+}
+
+// Определяет структуру запроса на подключение к чату, содержащую идентификатор чата и имя пользователя.
+message ConnectChatRequest {
+  string chat_id = 1; // Идентификатор чата, к которому происходит подключение.
+  string username = 2; // Имя пользователя, подключающегося к чату.
+}
+
+// Определяет структуру запроса на отправку сообщения, содержащую идентификатор чата и само сообщение.
+message SendMessageRequest {
+  string chat_id = 1; // Идентификатор чата, в который отправляется сообщение.
+  Message message = 2; // Само сообщение, отправляемое в чат.
 }
 
 message DeleteRequest {
   int64 id = 1;
 }
-
-message SendMessageRequest {
-    Chat chat = 1;
-}
-

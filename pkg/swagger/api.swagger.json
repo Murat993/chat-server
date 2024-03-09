@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Note API",
+    "title": "Chat API",
     "version": "1.0.0",
     "contact": {
       "name": "Murat N",
@@ -60,7 +60,7 @@
     },
     "/chat/v1/create": {
       "post": {
-        "summary": "Создание чата",
+        "summary": "Создает новый чат. Принимает пустой запрос и возвращает ответ с идентификатором чата.",
         "operationId": "ChatV1_Create",
         "responses": {
           "200": {
@@ -82,7 +82,8 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/chat_v1CreateRequest"
+              "type": "object",
+              "properties": {}
             }
           }
         ],
@@ -93,7 +94,7 @@
     },
     "/chat/v1/send-message": {
       "post": {
-        "summary": "Отправка сообщения",
+        "summary": "Отправляет сообщение в чат. Принимает идентификатор чата и сообщение, возвращает пустой ответ.",
         "operationId": "ChatV1_SendMessage",
         "responses": {
           "200": {
@@ -113,6 +114,7 @@
         "parameters": [
           {
             "name": "body",
+            "description": "Определяет структуру запроса на отправку сообщения, содержащую идентификатор чата и само сообщение.",
             "in": "body",
             "required": true,
             "schema": {
@@ -127,56 +129,47 @@
     }
   },
   "definitions": {
-    "chat_v1Chat": {
-      "type": "object",
-      "properties": {
-        "info": {
-          "$ref": "#/definitions/chat_v1ChatInfo"
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
-    "chat_v1ChatInfo": {
-      "type": "object",
-      "properties": {
-        "from": {
-          "type": "string"
-        },
-        "text": {
-          "type": "string"
-        }
-      }
-    },
-    "chat_v1CreateRequest": {
-      "type": "object",
-      "properties": {
-        "usernames": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "chat_v1CreateResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "chatId": {
+          "type": "string"
         }
-      }
+      },
+      "description": "Определяет структуру ответа на создание чата, содержащую идентификатор созданного чата."
+    },
+    "chat_v1Message": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Идентификатор/имя отправителя сообщения."
+        },
+        "text": {
+          "type": "string",
+          "description": "Текст сообщения."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Временная метка создания сообщения."
+        }
+      },
+      "description": "Определяет структуру сообщения, содержащую отправителя, текст сообщения и временную метку создания."
     },
     "chat_v1SendMessageRequest": {
       "type": "object",
       "properties": {
-        "chat": {
-          "$ref": "#/definitions/chat_v1Chat"
+        "chatId": {
+          "type": "string",
+          "description": "Идентификатор чата, в который отправляется сообщение."
+        },
+        "message": {
+          "$ref": "#/definitions/chat_v1Message",
+          "description": "Само сообщение, отправляемое в чат."
         }
-      }
+      },
+      "description": "Определяет структуру запроса на отправку сообщения, содержащую идентификатор чата и само сообщение."
     },
     "protobufAny": {
       "type": "object",
